@@ -11,6 +11,33 @@
     <body>
         <main>
             <h1>Dashboard</h1>
+            <table>
+                <tr>
+                    <th>pk_employee_ssn</th>
+                    <th>firstname</th>
+                    <th>lastname</th>
+                    <th>jobtitle</th>
+                    <th>salarytype</th>
+                    <th>performance</th>
+                    <th>hoursWorkedThisYear</th>
+                    <th>hoursworkedThisCycle</th>
+                    <th>wage</th>
+                </tr>
+                <% if(typeof data != 'undefined') { %>
+                    <% data.forEach(item=>{ %>
+                    <tr>
+                        <th><%= item.pk_employee_ssn %></th>
+                        <th><%= item.firstname %></th>
+                        <th><%= item.lastname %></th>
+                        <th><%= item.jobtitle %></th>
+                        <th><%= item.salarytype %></th>
+                        <th><%= item.performance %></th>
+                        <th><%= item.hoursWorkedThisYear %></th>
+                        <th><%= item.hoursworkedThisCycle %></th>
+                        <th><%= item.wage %></th>
+                    </tr>
+                    <% }) %> <% } %>
+            </table>
             <a href="/users/logout">Logout</a>
         </main>
     </body>

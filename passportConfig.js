@@ -4,6 +4,12 @@ const bcrypt = require("bcrypt");
 
 function initialize(passport) {
     const authenticateUser = (ssn, password, done) => {
+        var reg = new RegExp("^[0-9]+$");
+        if (!reg.test(ssn)) {
+            return done(null, false, {
+                message: "SSN can only contain numbers",
+            });
+        }
         pool.query(
             `SELECT * from employees WHERE pk_employee_ssn = $1`,
             [ssn],

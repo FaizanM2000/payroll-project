@@ -33,7 +33,14 @@ app.get("/users/login", checkAuthentication, (_req, res) => {
 });
 
 app.get("/users/dashboard", checkNoAuthentication, (_req, res) => {
-    res.render("dashboard");
+    pool.query(`SELECT * from employees`, (err, result) => {
+        if (err) {
+            throw err;
+        }
+        var data = result.rows;
+        //console.log(data);
+        res.render("dashboard", { data });
+    });
 });
 
 app.get("/users/logout", (req, res) => {
