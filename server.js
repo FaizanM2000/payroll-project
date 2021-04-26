@@ -50,6 +50,11 @@ app.post("/users/register", async (req, res) => {
         errors.push({ message: "Please enter all fields" });
     }
 
+    var reg = new RegExp("^[0-9]+$");
+    if (!reg.test(ssn)) {
+        errors.push({ message: "SSN can only contain numbers" });
+    }
+
     if (password.length < 6) {
         errors.push({ message: "Password is too short" });
     }
