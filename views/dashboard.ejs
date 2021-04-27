@@ -155,7 +155,7 @@ NOTE: Will need to create <ul><li> to notify user of issues with creation.
             <h1>Update</h1>
             <form action="/users/update" method="POST">
                 <div>
-                    <select name="table">
+                    <select id="table" name="table">
                         <option value="employees" selected>Employees</option>
                         <option value="dependent">Dependent</option>
                         <option value="tax">Tax</option>
@@ -164,7 +164,7 @@ NOTE: Will need to create <ul><li> to notify user of issues with creation.
                         <option value="insurance">Insurance</option>
                     </select>
                     <input type="text" id="primary_key" name="primary_key" placeholder="Primary Key" required>
-                    <select name="attribute">
+                    <select id="attribute" name="attribute">
                         <option value="firstname" selected>firstName</option>
                         <option value="lastName">lastName</option>
                         <option value="jobTitle">jobTitle</option>
@@ -197,9 +197,14 @@ NOTE: Will need to create <ul><li> to notify user of issues with creation.
                 <div><input type="submit" value="Update" /></div>
             </form>
             <h1>Create</h1>
+            <ul>
+                <% if(messages.success_msg) { %>
+                <li><%= messages.success_msg %></li>
+                <% } %>
+            </ul>
             <form action="/users/register" method="POST">
                 <div>
-                    <select name="table">
+                    <select id="table" name="table">
                         <option value="employees" selected>Employees</option>
                         <option value="dependent">Dependent</option>
                         <option value="tax">Tax</option>
