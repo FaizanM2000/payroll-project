@@ -3,5 +3,10 @@ h1 {
 }
 
 table, th, td {
+  padding: 0.25rem;
   border: 1px solid black;
+}
+
+table {
+  margin-bottom: 1rem;
 }

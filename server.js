@@ -32,15 +32,66 @@ app.get("/users/login", checkAuthentication, (_req, res) => {
     res.render("login");
 });
 
-app.get("/users/dashboard", checkNoAuthentication, (_req, res) => {
-    pool.query(`SELECT * from employees`, (err, result) => {
-        if (err) {
-            throw err;
-        }
-        var data = result.rows;
-        //console.log(data);
-        res.render("dashboard", { data });
-    });
+app.get("/users/dashboard", checkNoAuthentication, (req, res) => {
+    if (req.user.jobtitle == "employee") {
+        `SELECT * from employees
+            WHERE pk_employee_ssn = $1`,
+            [req.pk_employee_ssn],
+            (err, result) => {
+                if (err) {
+                    throw err;
+                }
+                employees = result.rows;
+                res.render("dashboard", {
+                    employees,
+                });
+            };
+    } else {
+        pool.query(`SELECT * from employees`, (err, result) => {
+            if (err) {
+                throw err;
+            }
+            var employees = result.rows;
+            pool.query(`SELECT * from dependent`, (err, result) => {
+                if (err) {
+                    throw err;
+                }
+                var dependent = result.rows;
+                pool.query(`SELECT * from bonus`, (err, result) => {
+                    if (err) {
+                        throw err;
+                    }
+                    var bonus = result.rows;
+                    pool.query(`SELECT * from benefits`, (err, result) => {
+                        if (err) {
+                            throw err;
+                        }
+                        var benefits = result.rows;
+                        pool.query(`SELECT * from insurance`, (err, result) => {
+                            if (err) {
+                                throw err;
+                            }
+                            var insurance = result.rows;
+                            pool.query(`SELECT * from tax`, (err, result) => {
+                                if (err) {
+                                    throw err;
+                                }
+                                var tax = result.rows;
+                                res.render("dashboard", {
+                                    employees,
+                                    dependent,
+                                    tax,
+                                    bonus,
+                                    benefits,
+                                    insurance,
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
 });
 
 app.get("/users/logout", (req, res) => {
@@ -49,6 +100,10 @@ app.get("/users/logout", (req, res) => {
     res.redirect("/users/login");
 });
 
+// TODO: THIS
+app.post("/users/update", async (req, res) => {});
+
+// TODO: Update this to account for new additions in all tables
 app.post("/users/register", async (req, res) => {
     let { ssn, password, password2 } = req.body;
     let errors = [];

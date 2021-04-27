@@ -1,5 +1,24 @@
 <!doctype html>
 
+<!--
+TODO: Create user privilege level in postgresql database. (employee, manager,
+admin).
+NOTE: employee.jobTitle may be used for this instead.
+TODO: Update /users/registers POST event to account for all types of table
+additions. Will need to check first if primary_key is valid (does not already
+exist), then update postgresql database accordingly.
+NOTE: Updating employee passwords will need to be passed through bcrypt and
+validated.
+NOTE: Will need to create <ul><li> to notify user of issues with updates.
+TODO: Create /users/update. Will need to check first if primary_key is valid
+(already exists), then if attribute exists in specified table, thirdly see if
+specified value is valid type for attibute, and finally update postgresql
+database.
+NOTE: Set employees password attribute to password on creation. This will
+allow admins to create users without having to specify passwords.
+NOTE: Will need to create <ul><li> to notify user of issues with creation.
+-->
+
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -20,11 +39,15 @@
                     <th>salarytype</th>
                     <th>performance</th>
                     <th>hoursWorkedThisYear</th>
-                    <th>hoursworkedThisCycle</th>
+                    <th>hoursWorkedThisCycle</th>
                     <th>wage</th>
+                    <th>fk_tax_id</th>
+                    <th>fk_bonus_id</th>
+                    <th>fk_benefits_id</th>
+                    <th>fk_insurance_id</th>
                 </tr>
-                <% if(typeof data != 'undefined') { %>
-                    <% data.forEach(item=>{ %>
+                <% if(typeof employees != 'undefined') { %>
+                    <% employees.forEach(item=>{ %>
                     <tr>
                         <th><%= item.pk_employee_ssn %></th>
                         <th><%= item.firstname %></th>
@@ -33,11 +56,161 @@
                         <th><%= item.salarytype %></th>
                         <th><%= item.performance %></th>
                         <th><%= item.hoursWorkedThisYear %></th>
-                        <th><%= item.hoursworkedThisCycle %></th>
+                        <th><%= item.hoursWorkedThisCycle %></th>
                         <th><%= item.wage %></th>
+                        <th><%= item.fk_tax_id %></th>
+                        <th><%= item.fk_bonus_id %></th>
+                        <th><%= item.fk_benefits_id %></th>
+                        <th><%= item.fk_insurance_id %></th>
                     </tr>
                     <% }) %> <% } %>
             </table>
+            <table>
+                <tr>
+                    <th>pk_dependent_ssn</th>
+                    <th>firstname</th>
+                    <th>lastname</th>
+                    <th>relation</th>
+                    <th>fk_benefits_id</th>
+                    <th>fk_employee_ssn</th>
+                </tr>
+                <% if(typeof dependent != 'undefined') { %>
+                    <% dependent.forEach(item=>{ %>
+                    <tr>
+                        <th><%= item.pk_dependent_ssn %></th>
+                        <th><%= item.firstname %></th>
+                        <th><%= item.lastname %></th>
+                        <th><%= item.relation %></th>
+                        <th><%= item.fk_benefits_id %></th>
+                        <th><%= item.fk_employee_ssn %></th>
+                    </tr>
+                    <% }) %> <% } %>
+            </table>
+            <table>
+                <tr>
+                    <th>pk_tax_id</th>
+                    <th>stateRate</th>
+                    <th>federalRate</th>
+                </tr>
+                <% if(typeof tax != 'undefined') { %>
+                    <% tax.forEach(item=>{ %>
+                    <tr>
+                        <th><%= item.pk_tax_id %></th>
+                        <th><%= item.stateRate %></th>
+                        <th><%= item.federalRate %></th>
+                    </tr>
+                    <% }) %> <% } %>
+            </table>
+            <table>
+                <tr>
+                    <th>pk_bonus_id</th>
+                    <th>allocatedPercentage</th>
+                </tr>
+                <% if(typeof bonus != 'undefined') { %>
+                    <% bonus.forEach(item=>{ %>
+                    <tr>
+                        <th><%= item.pk_bonus_id %></th>
+                        <th><%= item.allocatedPercentage %></th>
+                    </tr>
+                    <% }) %> <% } %>
+            </table>
+            <table>
+                <tr>
+                    <th>pk_benefits_id</th>
+                    <th>healthPlan</th>
+                    <th>contributionPlan</th>
+                    <th>attorneyPlan</th>
+                    <th>lifeInsurance</th>
+                </tr>
+                <% if(typeof benefits != 'undefined') { %>
+                    <% benefits.forEach(item=>{ %>
+                    <tr>
+                        <th><%= item.pk_benefits_id %></th>
+                        <th><%= item.healthPlan %></th>
+                        <th><%= item.contributionPlan %></th>
+                        <th><%= item.attorneyPlan %></th>
+                        <th><%= item.lifeInsurance %></th>
+                    </tr>
+                    <% }) %> <% } %>
+            </table>
+            <table>
+                <tr>
+                    <th>pk_insurance_id</th>
+                    <th>individualCost</th>
+                    <th>familyCost</th>
+                    <th>employeePaidPremium</th>
+                    <th>employerPaidPremium</th>
+                </tr>
+                <% if(typeof insurance != 'undefined') { %>
+                    <% insurance.forEach(item=>{ %>
+                    <tr>
+                        <th><%= item.pk_insurance_id %></th>
+                        <th><%= item.individualCost %></th>
+                        <th><%= item.familyCost %></th>
+                        <th><%= item.employeePaidPremium %></th>
+                        <th><%= item.employerPaidPremium %></th>
+                    </tr>
+                    <% }) %> <% } %>
+            </table>
+            <h1>Update</h1>
+            <form action="/users/update" method="POST">
+                <div>
+                    <select name="table">
+                        <option value="employees" selected>Employees</option>
+                        <option value="dependent">Dependent</option>
+                        <option value="tax">Tax</option>
+                        <option value="bonus">Bonus</option>
+                        <option value="benefits">Benefits</option>
+                        <option value="insurance">Insurance</option>
+                    </select>
+                    <input type="text" id="primary_key" name="primary_key" placeholder="Primary Key" required>
+                    <select name="attribute">
+                        <option value="firstname" selected>firstName</option>
+                        <option value="lastName">lastName</option>
+                        <option value="jobTitle">jobTitle</option>
+                        <option value="salaryType">salaryType</option>
+                        <option value="performance">performance</option>
+                        <option value="hoursWorkedThisYear">hoursWorkedThisYear</option>
+                        <option value="hoursWorkedThisCycle">hoursWorkedThisCycle</option>
+                        <option value="wage">wage</option>
+                        <option value="fk_tax_id">fk_tax_id</option>
+                        <option value="fk_bonus_id">fk_bonus_id</option>
+                        <option value="fk_benefits_id">fk_benefits_id</option>
+                        <option value="fk_insurance_id">fk_insurance_id</option>
+                        <option value="fk_employee_ssn">fk_employee_ssn</option>
+                        <option value="relation">relation</option>
+                        <option value="stateRate">stateRate</option>
+                        <option value="federalRate">federalRate</option>
+                        <option value="allocatedPercentage">allocatedPercentage</option>
+                        <option value="healthPlan">healthPlan</option>
+                        <option value="contributionPlan">contributionPlan</option>
+                        <option value="attorneyPlan">attorneyPlan</option>
+                        <option value="lifeInsurance">lifeInsurance</option>
+                        <option value="individualCost">individualCost</option>
+                        <option value="familyCost">familyCost</option>
+                        <option value="employeePaidPremium">employeePaidPremium</option>
+                        <option value="employerPaidPremium">employerPaidPremium</option>
+                        <option value="password">password</option>
+                    </select>
+                    <input type="text" id="value" name="value" placeholder="Value" required>
+                </div>
+                <div><input type="submit" value="Update" /></div>
+            </form>
+            <h1>Create</h1>
+            <form action="/users/register" method="POST">
+                <div>
+                    <select name="table">
+                        <option value="employees" selected>Employees</option>
+                        <option value="dependent">Dependent</option>
+                        <option value="tax">Tax</option>
+                        <option value="bonus">Bonus</option>
+                        <option value="benefits">Benefits</option>
+                        <option value="insurance">Insurance</option>
+                    </select>
+                    <input type="text" id="primary_key" name="primary_key" placeholder="Primary Key" required>
+                </div>
+                <div><input type="submit" value="Create" /></div>
+            </form>
             <a href="/users/logout">Logout</a>
         </main>
     </body>
